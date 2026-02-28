@@ -2108,6 +2108,1982 @@ Phylo.draw_ascii(tree)
 
 
 
+Blast:
+
+
+```python
+from Bio.Blast import NCBIWWW
+```
+
+
+```python
+import os
+print(os.listdir())
+```
+
+    ['SUMO.txt', 'opuntia.dnd', 'Untitled6.ipynb', 'Butter_image.ipynb', 'my_example.faa', 'Untitled12.ipynb', 'NC_005816.GB.txt', 'Untitled23.ipynb', 'Creating_Functions_Pt1.ipynb', 'Transcription.ipynb', 'Jupyter_Notebooks_Pt_1.ipynb', 'Untitled5.ipynb', 'Untitled20.ipynb', 'PF05371_seed.phy', 'NC_005816.fna.txt', 'Untitled8.ipynb', 'Ubiquitin_RNA.txt', 'Untitled17.ipynb', 'Untitled14.ipynb', 'Untitled11.ipynb', 'Butter.jpg', 'Chessboard.jpeg', 'Feature_Match.ipynb', 'Pairwise_Alignment.ipynb', 'swc-python', 'PF05371_seed.aln', 'Untitled9.ipynb', 'Sequence_Alignment.ipynb', 'Blast.ipynb', 'OpenCVBasics.ipynb', 'Untitled15.ipynb', 'Apple_Jacks.jpg', 'Object_Detection.ipynb', 'my_example.fasta', 'opuntia.aln', 'Untitled22.ipynb', 'Untitled27.ipynb', 'Untitled1.ipynb', 'rainbow.jpg', 'crossword.jpg', 'Corner_Detection.ipynb', 'PTEN_chimp.xml', 'Mushroom_fixed_image.jpg', 'Untitled16.ipynb', 'Untitled26.ipynb', 'Ubiquitin.txt', 'Untitled13.ipynb', 'Challenge_1.ipynb', 'Untitled4.ipynb', 'ls_orchid.fasta.txt', 'my_example.phy', 'Untitled7.ipynb', 'sequence.txt', 'Analyzing_data.ipynb', 'Ethan.jpg', 'Creating_Functions.ipynb', 'Untitled.ipynb', 'myfile.txt', 'Sunflower_Testing.jpg', 'Python_fundamentals', 'Seq_IO.ipynb', 'Making_choices.ipynb', 'Chessboard_green.png', 'Seq_Annotation.ipynb', '.ipynb_checkpoints', 'Defensive_programming.ipynb', 'PTEN.fasta', 'Untitled25.ipynb', 'Untitled19.ipynb', 'Lists.ipynb', 'Untitled10.ipynb', 'Ubiquitin_Protein.txt', 'Edge_Detection.ipynb', 'm_cold.xml', 'Errors.ipynb', 'Untitled18.ipynb', 'Untitled2.ipynb', 'Untitled3.ipynb', 'ls_orchid.gbk.txt', 'Translation.ipynb', 'Rainbow_Crossword.ipynb', 'Untitled21.ipynb', 'data-shell', 'All_Cereal.jpg', 'Loops.ipynb', 'PF05371_seed.sth', 'rev_comp.fasta', 'Untitled24.ipynb', 'Seq_Objects.ipynb', 'm_cold.fasta', 'Training_Sunflower.jpg']
+
+
+
+```python
+NCBIWWW.email = "dr.josh.vandenbrink@gmail.com"
+```
+
+
+```python
+result_handle = NCBIWWW.qblast("blastn", "nt", "8332116")
+```
+
+
+```python
+#https://github.com/biopython/biopython/blob/master/Doc/examples/m_cold.fasta
+```
+
+
+```python
+#sequenced something to be blasted
+from Bio import SeqIO
+```
+
+
+```python
+record = SeqIO.read("m_cold.fasta", format = "fasta")
+```
+
+
+```python
+#fasta record
+print(record)
+```
+
+
+```python
+results_handle = NCBIWWW.qblast("blastn", "nt", record.seq)
+```
+
+
+```python
+with open("m_cold.xml", "w") as out_handle:
+    out_handle.write(results_handle.read())
+
+results_handle.close()
+```
+
+
+```python
+from Bio.Blast import NCBIXML
+```
+
+
+```python
+result_handle = open("m_cold.xml")
+```
+
+
+```python
+blast_record = NCBIXML.read(result_handle)
+```
+
+
+```python
+E_VALUE_THRESH = 0.04
+```
+
+
+```python
+#most likely alignment is lowest e value
+for alignment in blast_record.alignments:
+    for hsp in alignment.hsps:
+        if hsp.expect < E_VALUE_THRESH:
+            print("****ALIGNMENT****")
+            print("sequence:", alignment.title)
+            print("length:", alignment.length)
+            print("e value:", hsp.expect)
+            print(hsp.query[0:75] + "...")
+            print(hsp.match[0:75] + "...")
+            print(hsp.sbjct[0:75] + "...")
+```
+
+
+```python
+# The e-value when compared to chimpanzee is 6.734e-117
+```
+
+
+
+Challenge:
+
+```python
+from Bio.Blast import NCBIWWW
+from Bio.Blast import NCBIXML
+from Bio import SeqIO
+
+NCBIWWW.email = "dr.josh.vandenbrink@gmail.com"
+```
+
+
+```python
+record = SeqIO.read("PTEN.fasta", format="fasta")
+print(record)
+```
+
+    ID: NM_000314.8
+    Name: NM_000314.8
+    Description: NM_000314.8 Homo sapiens phosphatase and tensin homolog (PTEN), transcript variant 1, mRNA
+    Number of features: 0
+    Seq('GTTCTCTCCTCTCGGAAGCTGCAGCCATGATGGAAGTTTGAGAGTTGAGCCGCT...CTA')
+
+
+
+```python
+results_handle = NCBIWWW.qblast(
+    "blastn",
+    "nt",
+    record.seq,
+    entrez_query="Pan troglodytes[ORGN]"
+)
+```
+
+
+```python
+with open("/tmp/PTEN_chimp.xml", "w") as out_handle:
+    out_handle.write(results_handle.read())
+
+results_handle.close()
+```
+
+
+```python
+result_handle = open("PTEN_chimp.xml")
+blast_record = NCBIXML.read(result_handle)
+```
+
+
+```python
+E_VALUE_THRESH = 0.04
+
+for alignment in blast_record.alignments:
+    for hsp in alignment.hsps:
+        if hsp.expect < E_VALUE_THRESH:
+            print("****ALIGNMENT****")
+            print("sequence:", alignment.title)
+            print("length:", alignment.length)
+            print("e value:", hsp.expect)
+            print(hsp.query[0:75] + "...")
+            print(hsp.match[0:75] + "...")
+            print(hsp.sbjct[0:75] + "...")
+```
+
+    ****ALIGNMENT****
+    sequence: gi|2697841038|ref|XM_016918822.4| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X3, mRNA
+    length: 4871
+    e value: 0.0
+    GGGCCGGTTTTAAACCTCCCGTGCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGCGGAGGC...
+    |||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||| ||||||...
+    GGGCCGGTTTTAAACCTCCCGTCCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGAGGAGGC...
+    ****ALIGNMENT****
+    sequence: gi|2697841037|ref|XM_016918820.4| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X2, mRNA
+    length: 2426
+    e value: 0.0
+    GGGCCGGTTTTAAACCTCCCGTGCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGCGGAGGC...
+    |||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||| ||||||...
+    GGGCCGGTTTTAAACCTCCCGTCCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGAGGAGGC...
+    ****ALIGNMENT****
+    sequence: gi|2697841036|ref|XM_054659760.2| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X1, mRNA
+    length: 2564
+    e value: 0.0
+    AGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGCC...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    AGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGCC...
+    ****ALIGNMENT****
+    sequence: gi|2697841036|ref|XM_054659760.2| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X1, mRNA
+    length: 2564
+    e value: 0.0
+    GGGCCGGTTTTAAACCTCCCGTGCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGCGGAGGC...
+    |||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||| ||||||...
+    GGGCCGGTTTTAAACCTCCCGTCCGCCGCCGCCGCACCCCCCGTGGCCCGGGCTCCGGAGGCCGCCGGAGGAGGC...
+    ****ALIGNMENT****
+    sequence: gi|2697841043|ref|XM_054659762.2| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X6, mRNA
+    length: 2322
+    e value: 0.0
+    AGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGCC...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    AGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGCC...
+    ****ALIGNMENT****
+    sequence: gi|2697841043|ref|XM_054659762.2| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X6, mRNA
+    length: 2322
+    e value: 1.37996e-127
+    GTTCTCTCCTCTCGGAAGCTGCAGCCATGATGGAAGTTTGAGAGTTGAGCCGCTGTGAGGCGAGGCCGGGCTCAG...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    GTTCTCTCCTCTCGGAAGCTGCAGCCATGATGGAAGTTTGAGAGTTGAGCCGCTGTGAGGCGAGGCCGGGCTCAG...
+    ****ALIGNMENT****
+    sequence: gi|2697841039|ref|XM_063780859.1| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X4, mRNA
+    length: 2447
+    e value: 0.0
+    AAGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGC...
+    || ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    AAAGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGC...
+    ****ALIGNMENT****
+    sequence: gi|2697841039|ref|XM_063780859.1| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X4, mRNA
+    length: 2447
+    e value: 1.37996e-127
+    GTTCTCTCCTCTCGGAAGCTGCAGCCATGATGGAAGTTTGAGAGTTGAGCCGCTGTGAGGCGAGGCCGGGCTCAG...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    GTTCTCTCCTCTCGGAAGCTGCAGCCATGATGGAAGTTTGAGAGTTGAGCCGCTGTGAGGCGAGGCCGGGCTCAG...
+    ****ALIGNMENT****
+    sequence: gi|2697841041|ref|XM_063780860.1| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X5, mRNA
+    length: 4079
+    e value: 0.0
+    AAGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGC...
+    || ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    AAAGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCTTTGTGCTGAAAGACATTATGACACCGC...
+    ****ALIGNMENT****
+    sequence: gi|2697841044|ref|XM_054659763.2| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X7, mRNA
+    length: 1964
+    e value: 0.0
+    TTGTGCTGAAAGACATTATGACACCGCCAAATTTAATTGCAGAGTTGCACAATATCCTTTTGAAGACCATAACCC...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    TTGTGCTGAAAGACATTATGACACCGCCAAATTTAATTGCAGAGTTGCACAATATCCTTTTGAAGACCATAACCC...
+    ****ALIGNMENT****
+    sequence: gi|2697700857|ref|XM_054658772.2| PREDICTED: Pan troglodytes phosphatidylinositol 3,4,5-trisphosphate 3-phosphatase and dual-specificity protein phosphatase PTEN-like (LOC107976636), mRNA
+    length: 1753
+    e value: 0.0
+    TCGCCTGTCACCATTTCCAGGGCTGGGAACGCCGGAGAGTTGGTCTCTCCCCTTCTACTGCCTCCAACACGGCGG...
+    |||||||||||||||||||||||| ||||||||||||||||||||||||||||||||||||||||||||||||||...
+    TCGCCTGTCACCATTTCCAGGGCTAGGAACGCCGGAGAGTTGGTCTCTCCCCTTCTACTGCCTCCAACACGGCGG...
+    ****ALIGNMENT****
+    sequence: gi|2697841045|ref|XM_016918823.4| PREDICTED: Pan troglodytes phosphatase and tensin homolog (PTEN), transcript variant X8, mRNA
+    length: 1926
+    e value: 0.0
+    AGGGAGTAACTATTCCCAGTCAGAGGCGCTATGTGTATTATTATAGCTACCTGTTAAAGAATCATCTGGATTATA...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    AGGGAGTAACTATTCCCAGTCAGAGGCGCTATGTGTATTATTATAGCTACCTGTTAAAGAATCATCTGGATTATA...
+    ****ALIGNMENT****
+    sequence: gi|46391257|gb|AC148869.1| Pan troglodytes fosmid clone CH1251-3642E8 from Y, complete sequence
+    length: 39487
+    e value: 2.67575e-35
+    ATATTTATCCAAACATTATTGCTATGGGATTTCCTGCAGAAAGACTTGAAGGCGTATACAGGAACAATATTGATG...
+    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||...
+    ATATTTATCCAAACATTATTGCTATGGGATTTCCTGCAGAAAGACTTGAAGGCGTATACAGGAACAATATTGATG...
+    ****ALIGNMENT****
+    sequence: gi|46391257|gb|AC148869.1| Pan troglodytes fosmid clone CH1251-3642E8 from Y, complete sequence
+    length: 39487
+    e value: 1.13876e-14
+    TAAGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCT...
+    |||||||||||||||||||||||||||||||||||||||||||||||||...
+    TAAGGTTTTTGGATTCAAAGCATAAAAACCATTACAAGATATACAATCT...
+    ****ALIGNMENT****
+    sequence: gi|46391257|gb|AC148869.1| Pan troglodytes fosmid clone CH1251-3642E8 from Y, complete sequence
+    length: 39487
+    e value: 5.89894e-12
+    TTGTGCTGAAAGACATTATGACACCGCCAAATTTAATTGCAGAG...
+    ||||||||||||||||||||||||||||||||||||||||||||...
+    TTGTGCTGAAAGACATTATGACACCGCCAAATTTAATTGCAGAG...
+    ****ALIGNMENT****
+    sequence: gi|1935598482|gb|AC280478.1| Pan troglodytes BAC CH251-83J1 from chromosome, complete sequence
+    length: 164822
+    e value: 1.29933e-07
+    GTTTGTAAGTGTGTGTGTGTGTGTCTGTGTGTGTGTGAATTTGATTTTC...
+    || |||  |||||||||||||||| |||||||||||| |||||||||||...
+    GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTATTTGATTTTC...
+    ****ALIGNMENT****
+    sequence: gi|116734894|gb|AC190401.2| Pan troglodytes chromosome X clone CH251-254K15 map human ortholog p11.23, complete sequence
+    length: 164664
+    e value: 1.29933e-07
+    GTTTGTAAGTGTGTGTGTGTGTGTCTGTGTGTGTGTGAATTTGATTTTC...
+    || |||  |||||||||||||||| |||||||||||| |||||||||||...
+    GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTATTTGATTTTC...
+    ****ALIGNMENT****
+    sequence: gi|119226292|gb|AC188381.2| Pan troglodytes chromosome X clone RP43-32N7 map human ortholog p11.23, complete sequence
+    length: 226894
+    e value: 1.29933e-07
+    GTTTGTAAGTGTGTGTGTGTGTGTCTGTGTGTGTGTGAATTTGATTTTC...
+    || |||  |||||||||||||||| |||||||||||| |||||||||||...
+    GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTATTTGATTTTC...
+    ****ALIGNMENT****
+    sequence: gi|41350103|gb|AC146278.3| Pan troglodytes BAC clone CH251-26J9 from X, complete sequence
+    length: 199900
+    e value: 1.29933e-07
+    GTTTGTAAGTGTGTGTGTGTGTGTCTGTGTGTGTGTGAATTTGATTTTC...
+    || |||  |||||||||||||||| |||||||||||| |||||||||||...
+    GTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTGTATTTGATTTTC...
+    ****ALIGNMENT****
+    sequence: gi|113930808|gb|AC187609.2| Pan troglodytes BAC clone CH251-707E3 from chromosome 7, complete sequence
+    length: 179168
+    e value: 6.73068e-05
+    AAGCCAACCGATACTTTTCTCCAAATTTTAAGGT...
+    |||||||||| |||||||||||||||||||||||...
+    AAGCCAACCGGTACTTTTCTCCAAATTTTAAGGT...
+    ****ALIGNMENT****
+    sequence: gi|2697724140|ref|XM_063792403.1| PREDICTED: Pan troglodytes transmembrane phosphoinositide 3-phosphatase and tensin homolog 2 (TPTE2), mRNA
+    length: 2227
+    e value: 0.000819965
+    AAACAAAAGGAGATAT-CAAGAGGATGGATTCGACTTAGACTTGACCTATATTTATCCAAAC--ATTATTGCTAT...
+    |||||||||| ||||  |||| ||||||||| ||| ||||| | || ||  ||   |  |||  |||||||||||...
+    AAACAAAAGGCGATACACAAG-GGATGGATTTGACCTAGACCTCACTTACGTTA--CAGAACGTATTATTGCTAT...
+    ****ALIGNMENT****
+    sequence: gi|208879557|gb|AC213003.6| Pan troglodytes BAC clone CH251-527K4 from chromosome unknown, complete sequence
+    length: 192993
+    e value: 0.00286196
+    ATACTGAATACATATAATGTTTATATTAAAAAGGACATTTGTGTTAAAAAGGAAATTA...
+    |||||||||||||||| | |||||| | | ||| ||| || || ||||||| | ||||...
+    ATACTGAATACATATATTATTTATAATCAGAAGAACAATTTTG-TAAAAAGAACATTA...
+    ****ALIGNMENT****
+    sequence: gi|126567708|gb|AC192063.3| Pan troglodytes BAC clone CH251-585E13 from chromosome x, complete sequence
+    length: 219217
+    e value: 0.00998922
+    AATTTATATTTTTTATTTTTTAAAATTAAAAATAATTTATATTT...
+    ||||||||| || |  |||||||||||||||||||||| || ||...
+    AATTTATATATTCT--TTTTTAAAATTAAAAATAATTTTTAATT...
+    ****ALIGNMENT****
+    sequence: gi|88759754|gb|AC161061.2| Pan troglodytes BAC clone CH251-489A6 from chromosome 7, complete sequence
+    length: 177652
+    e value: 0.0348658
+    GCGGCGGCGGCGGCGGCCGCGGCGGCTGCAGCTCCAGG...
+    ||||| |||| ||||||||||| |||||||||||||||...
+    GCGGCCGCGG-GGCGGCCGCGG-GGCTGCAGCTCCAGG...
+    ****ALIGNMENT****
+    sequence: gi|2697823852|ref|XM_024357637.3| PREDICTED: Pan troglodytes homeobox A7 (HOXA7), transcript variant X3, mRNA
+    length: 2801
+    e value: 0.0348658
+    GCGGCGGCGGCGGCGGCCGCGGCGGCTGCAGCTCCAGG...
+    ||||| |||| ||||||||||| |||||||||||||||...
+    GCGGCCGCGG-GGCGGCCGCGG-GGCTGCAGCTCCAGG...
+    ****ALIGNMENT****
+    sequence: gi|38230057|gb|AC146102.2| Pan troglodytes BAC clone RP43-21L13 from chromosome 7, complete sequence
+    length: 191971
+    e value: 0.0348658
+    GCGGCGGCGGCGGCGGCCGCGGCGGCTGCAGCTCCAGG...
+    ||||| |||| ||||||||||| |||||||||||||||...
+    GCGGCCGCGG-GGCGGCCGCGG-GGCTGCAGCTCCAGG...
+    ****ALIGNMENT****
+    sequence: gi|2697823851|ref|XM_024357636.3| PREDICTED: Pan troglodytes homeobox A7 (HOXA7), transcript variant X2, mRNA
+    length: 2956
+    e value: 0.0348658
+    GCGGCGGCGGCGGCGGCCGCGGCGGCTGCAGCTCCAGG...
+    ||||| |||| ||||||||||| |||||||||||||||...
+    GCGGCCGCGG-GGCGGCCGCGG-GGCTGCAGCTCCAGG...
+    ****ALIGNMENT****
+    sequence: gi|124248821|gb|AC192847.2| Pan troglodytes BAC clone CH251-615H12 from chromosome 7, complete sequence
+    length: 220783
+    e value: 0.0348658
+    AAAAAAAAGACATTTGATTTTTCAGTAGAAATTG...
+    ||||||||| |||||||||||| | |||||||||...
+    AAAAAAAAGCCATTTGATTTTTTAATAGAAATTG...
+    ****ALIGNMENT****
+    sequence: gi|109689902|gb|AC161013.3| Pan troglodytes BAC clone CH251-500P22 from chromosome 7, complete sequence
+    length: 182158
+    e value: 0.0348658
+    GAAAGAATAGGGTTTTTTTTTTTTTTTTTTTTTTTTTTTTT...
+    |||||||||||  | |   ||||||||||||||||||||||...
+    GAAAGAATAGGCATCTACATTTTTTTTTTTTTTTTTTTTTT...
+    ****ALIGNMENT****
+    sequence: gi|37537302|dbj|BS000035.1| Pan troglodytes chromosome 22 clone:PTB-089G12, map 22, complete sequences
+    length: 225055
+    e value: 0.0348658
+    GGAAATGGAAAA--ATGGCAT-TATATATATTATATATATAAATATATATTATACATAC...
+    ||||||||||||  |||| || ||||||||||| ||||||| | | | |  ||||||||...
+    GGAAATGGAAAAATATGGAATATATATATATTACATATATACACACACA-CATACATAC...
+    ****ALIGNMENT****
+    sequence: gi|1375456986|gb|AC277666.1| Pan troglodytes chromosome 1 clone CH251-20A5, complete sequence
+    length: 195881
+    e value: 0.0348658
+    ATTTATATTTTTTATTTTT-TAAAATTAAAAATAATTTATATT...
+    ||||  ||||| ||||| | |||||| ||||||||||||||||...
+    ATTTTAATTTTGTATTTCTATAAAATAAAAAATAATTTATATT...
+
+
+
+```python
+# The e-value when compared to chimpanzee is 0.0.
+```
+
+
+Open CV:
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+import cv2
+```
+
+
+```python
+img = cv2.imread("Butter.jpg")
+```
+
+
+```python
+type(img)
+```
+
+
+
+
+    numpy.ndarray
+
+
+
+
+```python
+img_wrong = cv2.imread('wrong/path/doesnot/abcdegh.jpg')
+```
+
+
+```python
+type(img_wrong)
+```
+
+
+
+
+    NoneType
+
+
+
+
+```python
+# image but used in blue because it starts with B
+plt.imshow(img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f003054cf90>
+
+
+
+
+![png](output_6_1.png)
+
+
+
+```python
+fix_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+plt.imshow(fix_img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f0030480450>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+img_gray = cv2.imread("Butter.jpg", cv2. IMREAD_GRAYSCALE)
+img_gray.shape
+```
+
+
+
+
+    (360, 610)
+
+
+
+
+```python
+plt.imshow(img_gray)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002ebec250>
+
+
+
+
+![png](output_10_1.png)
+
+
+
+```python
+#used for computationally heavy info 
+plt.imshow(img_gray, cmap = "gray")
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002e360e50>
+
+
+
+
+![png](output_11_1.png)
+
+
+
+```python
+fix_img.shape
+```
+
+
+
+
+    (360, 610, 3)
+
+
+
+
+```python
+new_img = cv2.resize(fix_img, (1000,400))
+plt.imshow(new_img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002e2d96d0>
+
+
+
+
+![png](output_13_1.png)
+
+
+
+```python
+new_img.shape
+```
+
+
+
+
+    (400, 1000, 3)
+
+
+
+
+```python
+w_ratio = 0.5
+h_ratio = 0.5
+
+new_img = cv2.resize(fix_img, (0,0), fix_img, w_ratio, h_ratio)
+```
+
+
+```python
+plt.imshow(new_img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002e2bd1d0>
+
+
+
+
+![png](output_16_1.png)
+
+
+
+```python
+new_img.shape
+```
+
+
+
+
+    (180, 305, 3)
+
+
+
+
+```python
+#flipping image down
+flip_img = cv2.flip(fix_img, 0)
+plt.imshow(flip_img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002e224bd0>
+
+
+
+
+![png](output_18_1.png)
+
+
+
+```python
+#flipping image down and over
+flip_img2 = cv2.flip(fix_img, -1)
+plt.imshow(flip_img2)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f002e1a5250>
+
+
+
+
+![png](output_19_1.png)
+
+
+
+```python
+type(fix_img)
+```
+
+
+
+
+    numpy.ndarray
+
+
+
+
+```python
+# only saves the second image
+cv2.imwrite('Mushroom_fixed_image.jpg', flip_img)
+```
+
+
+
+
+    True
+
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+img = cv2.imread("Butter.jpg")
+```
+
+
+```python
+plt.imshow(img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb373a58290>
+
+
+
+
+![png](output_2_1.png)
+
+
+
+```python
+img1 = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+#colors get fixed
+plt.imshow(img1)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb373a0c710>
+
+
+
+
+![png](output_4_1.png)
+
+
+
+```python
+#Hue saturation value
+img2 = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+```
+
+
+```python
+plt.imshow(img2)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb3721818d0>
+
+
+
+
+![png](output_6_1.png)
+
+
+
+```python
+#Hue saturation lightness
+img3 = cv2.cvtColor(img, cv2.COLOR_BGR2HLS)
+```
+
+
+```python
+plt.imshow(img3)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb3720fd450>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+```
+
+
+```python
+img1 = cv2.imread('Ethan.jpg')
+img2 = cv2.imread("Butter.jpg")
+```
+
+
+```python
+plt.imshow(img1)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb372070390>
+
+
+
+
+![png](output_11_1.png)
+
+
+
+```python
+img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+plt.imshow(img1)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb3720236d0>
+
+
+
+
+![png](output_13_1.png)
+
+
+
+```python
+plt.imshow(img2)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb371f909d0>
+
+
+
+
+![png](output_14_1.png)
+
+
+
+```python
+img1 = cv2.resize(img1, (1200,1200))
+img2 = cv2.resize(img2, (1200,1200))
+```
+
+
+```python
+alpha = 0.5
+beta = 0.5
+```
+
+
+```python
+blended = cv2.addWeighted(img1, alpha, img2, beta, gamma=0)
+```
+
+
+```python
+#merged the images
+plt.imshow(blended)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb371f83b50>
+
+
+
+
+![png](output_18_1.png)
+
+
+
+```python
+#image overlay important for microscopy
+alphas = 0.8
+beta = 0.2
+
+blended1 = cv2.addWeighted(img1, alpha, img2, beta, 0)
+plt.imshow(blended1)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb370100490>
+
+
+
+
+![png](output_19_1.png)
+
+
+
+```python
+img1 = cv2.imread('Ethan.jpg')
+img2 = cv2.imread('Butter.jpg')
+
+img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)
+
+img1 = cv2.resize(img1, (200,200))
+```
+
+
+```python
+#change the image proportions
+large_img = img2
+small_img = img1
+
+x_offset = 0
+y_offset = 0
+
+x_end = x_offset + small_img.shape[1]
+y_end = y_offset + small_img.shape[0]
+
+large_img[y_offset:y_end, x_offset:x_end] = small_img
+
+plt.imshow(large_img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7fb370509510>
+
+
+
+
+![png](output_21_1.png)
+
+
+
+```python
+# https://github.com/worklifeesg/Python-for-Computer-Vision-with-OpenCV-and-Deep-Learning
+```
+
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+img = cv2.imread('rainbow.jpg')
+```
+
+
+```python
+plt.imshow(img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c56ab5fd0>
+
+
+
+
+![png](output_3_1.png)
+
+
+
+```python
+#cancel out background colors
+img = cv2.imread('rainbow.jpg', 0)
+```
+
+
+```python
+plt.imshow(img, cmap = 'gray')
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c569d7ed0>
+
+
+
+
+![png](output_5_1.png)
+
+
+
+```python
+#threshold this image
+ret1, thresh1 = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+```
+
+
+```python
+#cutoff value
+ret1
+```
+
+
+
+
+    127.0
+
+
+
+
+```python
+plt.imshow(thresh1, cmap = "gray")
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c54952810>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+img2 = cv2.imread('rainbow.jpg', 0)
+ret1, thresh1 = cv2.threshold(img2, 127, 255, cv2.THRESH_TRUNC)
+plt.imshow(thresh1, cmap = "gray")
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c548b4650>
+
+
+
+
+![png](output_9_1.png)
+
+
+
+```python
+img3 = cv2.imread('rainbow.jpg', 0)
+ret1, thresh1 = cv2.threshold(img3, 127, 255, cv2.THRESH_TOZERO)
+plt.imshow(thresh1, cmap = "gray")
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c54897750>
+
+
+
+
+![png](output_10_1.png)
+
+
+
+```python
+img_r = cv2.imread('crossword.jpg',0)
+plt.imshow(img_r, cmap = 'gray')
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f4c548009d0>
+
+
+
+
+![png](output_11_1.png)
+
+
+
+```python
+def show_pic(img):
+    fig = plt.figure(figsize = (15,15))
+    ax = fig.add_subplot(111)
+    ax.imshow(img, cmap = 'gray')
+```
+
+
+```python
+show_pic(img_r)
+```
+
+
+![png](output_13_0.png)
+
+
+
+```python
+#cutout other code 
+ret, th1 = cv2.threshold(img_r, 127, 255, cv2.THRESH_BINARY)
+show_pic(th1)
+```
+
+
+![png](output_14_0.png)
+
+
+
+```python
+#fine tuning to get best result of image
+ret, th1 = cv2.threshold(img_r, 200, 255, cv2.THRESH_BINARY)
+show_pic(th1)
+```
+
+
+![png](output_15_0.png)
+
+
+
+```python
+th2 = cv2.adaptiveThreshold(img_r, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 8)
+```
+
+
+```python
+show_pic(th2)
+```
+
+
+![png](output_17_0.png)
+
+
+
+```python
+#layering th2 underneath th1
+blended = cv2.addWeighted(src1 = th1, alpha = 0.6,
+                         src2 = th2, beta = 0.4, gamma = 0)
+show_pic(blended)
+```
+
+
+![png](output_18_0.png)
+
+
+
+```python
+import cv2
+import matplotlib.pyplot as plt
+```
+
+
+```python
+th3 = cv2.adaptiveThreshold(img_r, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 8)
+
+
+blended = cv2.addWeighted(src1=th1,alpha=0.6,
+                          src2=th3,beta=0.4,gamma=0)
+
+show_pic(blended)
+```
+
+
+![png](output_20_0.png)
+
+
+
+
+
+
+Aspect Detection:
+
+Corner Detection
+
+
+```python
+#detect corners
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+flat_chess = cv2.imread('Chessboard_green.png')
+flat_chess = cv2.cvtColor(flat_chess,cv2.COLOR_BGR2RGB)
+plt.imshow(flat_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f39554ea450>
+
+
+
+
+![png](output_1_1.png)
+
+
+
+```python
+gray_flat_chess = cv2.cvtColor(flat_chess,cv2.COLOR_BGR2GRAY)
+plt.imshow(gray_flat_chess, cmap = "gray")
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f3954c16e90>
+
+
+
+
+![png](output_2_1.png)
+
+
+
+```python
+real_chess = cv2.imread("Chessboard.jpeg")
+real_chess = cv2.cvtColor(real_chess, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+plt.imshow(real_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f3954b91790>
+
+
+
+
+![png](output_4_1.png)
+
+
+
+```python
+gray_real_chess = cv2.cvtColor(real_chess, cv2.COLOR_BGR2GRAY)
+plt.imshow(gray_real_chess, cmap = 'gray')
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f395330d7d0>
+
+
+
+
+![png](output_5_1.png)
+
+
+
+```python
+#Harris corner detection method
+gray = np.float32(gray_flat_chess)
+dst = cv2.cornerHarris(src = gray, blockSize = 2, ksize = 3, k = 0.04)
+
+dst = cv2.dilate(dst, None)
+```
+
+
+```python
+#when the Harris results are greater it will be assigned to the color red
+flat_chess[dst>0.01*dst.max()] = [255,0,0]
+
+plt.imshow(flat_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f395327cdd0>
+
+
+
+
+![png](output_7_1.png)
+
+
+
+```python
+#using 255 make it all red
+gray = np.float32(gray_real_chess)
+dst = cv2.cornerHarris(src = gray, blockSize = 2, ksize = 3, k = 0.04)
+dst = cv2.dilate(dst, None)
+
+real_chess[dst>0.01*dst.max()] = [255, 0, 0]
+
+plt.imshow(real_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f3953265b50>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+#Shi-Tomasi Corner Detection
+
+corners = cv2.goodFeaturesToTrack(gray_flat_chess, 64, 0.01, 10)
+```
+
+
+```python
+corners = np.int0(corners)
+
+for i in corners:
+    x,y = i.ravel()
+    cv2.circle(flat_chess, (x,y),3,(255,0,0), -1)
+    
+plt.imshow(flat_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f39531dca10>
+
+
+
+
+![png](output_10_1.png)
+
+
+
+```python
+corners = cv2.goodFeaturesToTrack(gray_real_chess, 100, 0.01, 10)
+
+corners = np.int0(corners)
+
+for i in corners:
+    x, y = i.ravel()
+    cv2.circle(real_chess, (x,y), 3, (0,255,0), -1)
+    
+plt.imshow(real_chess)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f395314e190>
+
+
+
+
+![png](output_11_1.png)
+
+
+Edge Detection
+
+
+
+```python
+import cv2
+```
+
+
+```python
+import numpy as np
+```
+
+
+```python
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+img = cv2.imread("Ethan.jpg")
+plt.imshow(img)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f7506206390>
+
+
+
+
+![png](output_3_1.png)
+
+
+
+```python
+edges = cv2.Canny(image = img, threshold1 = 127, threshold2 = 127)
+
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f7505dbac50>
+
+
+
+
+![png](output_4_1.png)
+
+
+
+```python
+med_value = np.median(img)
+med_value
+```
+
+
+
+
+    99.0
+
+
+
+
+```python
+#change the lower and upper limits of threshold
+lower = int(max(0, 0.7*med_value))
+upper = int(min(255,1.3*med_value))
+
+edges = cv2.Canny(img, threshold1 = lower, threshold2 = upper)
+                 
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f7504537d90>
+
+
+
+
+![png](output_6_1.png)
+
+
+
+```python
+edges = cv2.Canny(image= img, threshold1 = lower, threshold2 = upper +100)
+
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f750698b6d0>
+
+
+
+
+![png](output_7_1.png)
+
+
+
+```python
+#blurring as a solution
+blurred_img = cv2.blur(img, ksize = (5,5))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f75044155d0>
+
+
+
+
+![png](output_8_1.png)
+
+
+
+```python
+blurred_img = cv2.blur(img, ksize = (7,7))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f7504404490>
+
+
+
+
+![png](output_9_1.png)
+
+
+
+```python
+blurred_img = cv2.blur(img, ksize = (5,5))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper + 50)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f75043725d0>
+
+
+
+
+![png](output_10_1.png)
+
+
+
+```python
+blurred_img = cv2.blur(img, ksize = (5,5))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper +100)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f75042e16d0>
+
+
+
+
+![png](output_11_1.png)
+
+
+
+```python
+blurred_img = cv2.blur(img, ksize = (7,7))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper + 60)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f750424f790>
+
+
+
+
+![png](output_12_1.png)
+
+
+
+```python
+blurred_img = cv2.blur(img, ksize = (8,8))
+
+edges = cv2.Canny(image=blurred_img, 
+                 threshold1 = lower,
+                 threshold2 = upper)
+plt.imshow(edges)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f750423c650>
+
+
+
+
+![png](output_13_1.png)
+
+
+
+
+Feature Detection:
+
+Feature Matches
+
+```python
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+```
+
+
+```python
+def display(img, cmap = 'gray'):
+    fig = plt.figure(figsize = (12, 10))
+    ax = fig.add_subplot(111)
+    ax.imshow(img, cmap = 'gray')
+
+```
+
+
+```python
+apple_jacks = cv2.imread("Apple_Jacks.jpg",0)
+display(apple_jacks)
+```
+
+
+![png](output_2_0.png)
+
+
+
+```python
+cereals = cv2.imread('All_Cereal.jpg', 0)
+display(cereals)
+```
+
+
+![png](output_3_0.png)
+
+
+
+```python
+#way of finding key points in the thing you are searching for
+orb = cv2.ORB_create()
+
+kp1,des1 = orb.detectAndCompute(apple_jacks, mask=None)
+kp2,des2 = orb.detectAndCompute(cereals, mask=None)
+                            
+```
+
+
+```python
+bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck = True)
+matches= bf.match(des1, des2)
+```
+
+
+```python
+matches = sorted(matches, key = lambda x:x.distance)
+```
+
+
+```python
+apple_jacks_matches = cv2.drawMatches(apple_jacks, kp1, cereals, kp2, matches[:25], None, flags =2)
+```
+
+
+```python
+display(apple_jacks_matches)
+```
+
+
+![png](output_8_0.png)
+
+
+
+```python
+sift = cv2.SIFT_create()
+```
+
+
+```python
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+#finds the best matcher in each descriptor for this set
+bf = cv2.BFMatcher()
+matches = bf.knnMatch(des1, des2, k=2)
+```
+
+
+```python
+good = []
+
+for match1, match2 in matches:
+    if match1.distance < 0.75*match2.distance:
+        good.append([match1])
+```
+
+
+```python
+print('Length of total matches:', len(matches))
+print('Length of good matches:', len(good))
+```
+
+    Length of total matches: 2650
+    Length of good matches: 27
+
+
+
+```python
+shift_matches = cv2.drawMatchesKnn(apple_jacks, kp1, cereals, kp2, good, None, flags =2)
+display(shift_matches)
+```
+
+
+![png](output_14_0.png)
+
+
+
+```python
+sift = cv2.SIFT_create()
+
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+flann_index_KDtree = 0
+index_params = dict(algorithm=flann_index_KDtree, trees = 5)
+search_params = dict(checks=50)
+```
+
+
+```python
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+matches = flann.knnMatch(des1, des2, k=2)
+
+good = []
+
+for match1, match2, in matches:
+    if match1.distance < 0.75*match2.distance:
+        good.append([match1])
+```
+
+
+```python
+flann_matches = cv2.drawMatchesKnn(apple_jacks, kp1, cereals, kp2, good, None, flags = 0)
+display (flann_matches)
+```
+
+
+![png](output_18_0.png)
+
+
+
+```python
+sift = cv2.SIFT_create()
+
+kp1, des1 = sift.detectAndCompute(apple_jacks, None)
+kp2, des2 = sift.detectAndCompute(cereals, None)
+```
+
+
+```python
+flann_index_KDtree = 0
+indx_params = dict(algorithm= flann_index_KDtree, trees = 5)
+
+search_param = dict(checks = 50)
+```
+
+
+```python
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+matches = flann.knnMatch(des1, des2, k =2 )
+```
+
+
+```python
+matchesMask = [[0,0] for i in range (len(matches))]
+```
+
+
+```python
+for i, (match1, match2) in enumerate(matches):
+    if match1.distance <0.75*match2.distance:
+        matchesMask[i] = [1,0]
+        
+draw_params = dict(matchColor = (0,255,0),
+                  singlePointColor = (255,0,0),
+                  matchesMask = matchesMask,
+                  flags = 0)
+```
+
+
+```python
+#showing all the features that we identified fromboth boxes
+flann_matches = cv2.drawMatchesKnn(apple_jacks, kp1,cereals, kp2, matches, None, **draw_params)
+
+display(flann_matches)
+```
+
+
+![png](output_24_0.png)
+
+
+Object Detection
+
+
+```python
+import cv2
+```
+
+
+```python
+import numpy as np
+```
+
+
+```python
+import matplotlib.pyplot as plt
+```
+
+
+```python
+%matplotlib inline
+```
+
+
+```python
+#detect objects image
+full = cv2.imread('Training_Sunflower.jpg')
+```
+
+
+```python
+full = cv2.cvtColor(full, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+plt.imshow(full)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f8a6b448490>
+
+
+
+
+![png](output_6_1.png)
+
+
+
+```python
+test = cv2.imread('Sunflower_Testing.jpg')
+```
+
+
+```python
+test = cv2.cvtColor(test, cv2.COLOR_BGR2RGB)
+```
+
+
+```python
+plt.imshow(test)
+```
+
+
+
+
+    <matplotlib.image.AxesImage at 0x7f8a6b37fc50>
+
+
+
+
+![png](output_9_1.png)
+
+
+
+```python
+print('Test image shape:', full.shape)
+print('Training image shape:', test.shape)
+```
+
+    Test image shape: (612, 612, 3)
+    Training image shape: (298, 298, 3)
+
+
+
+```python
+methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR', 'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF']
+```
+
+
+```python
+# takes input image and makes a heatmap of the pixels
+for m in methods:
+    
+    test_copy = test.copy()
+    method = eval(m)
+    
+    res = cv2.matchTemplate(test_copy, full, method)
+    
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    
+    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+        top_left = min_loc
+    else:
+        top_left = max_loc
+        
+    height, width, channels = full.shape
+    bottom_right = (top_left[0] + width, top_left[1] + height)
+    
+    cv2.rectangle(test_copy, top_left, bottom_right, (255,0,0),10)
+    
+    plt.subplot(121)
+    plt.imshow(res)
+    plt.title("Heatmap of template matching")
+    plt.subplot(122)
+    plt.imshow(test_copy)
+    plt.title('Detection of template')
+    
+    plt.suptitle(m)
+    
+    plt.show()
+    print('\n')
+    print('\n')
+```
+
+
+![png](output_12_0.png)
+
+
+    
+    
+    
+    
+
+
+
+![png](output_12_2.png)
+
+
+    
+    
+    
+    
+
+
+
+![png](output_12_4.png)
+
+
+    
+    
+    
+    
+
+
+
+![png](output_12_6.png)
+
+
+    
+    
+    
+    
+
+
+
+![png](output_12_8.png)
+
+
+    
+    
+    
+    
+
+
+
+![png](output_12_10.png)
+
+
+    
+    
+    
+    
+
+
+
+
+
+
+
+
 
 
 
