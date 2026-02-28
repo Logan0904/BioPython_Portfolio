@@ -3,7 +3,11 @@ This is a portfolio of python code that I learned for the BioPython series
 
 
 
-Sequence I/O
+Sequence I/O:
+
+
+
+
 
 ```python
 from Bio import SeqIO
